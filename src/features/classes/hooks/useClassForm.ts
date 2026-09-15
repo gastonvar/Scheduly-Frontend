@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import type { ClassInput } from '@/features/classes/api/classes-api';
 import { computeClassPriceFromSubject, computeClassTotals } from '@/features/classes/utils/classPrice';
 import { findOverlappingClass, formatOverlapError } from '@/features/classes/utils/overlap';
+import { snapDurationHours } from '@/features/classes/utils/slotDuration';
 import type { Class, ClassPaymentStatus, Student, Subject } from '@/types';
 import { fromLocalInputValue, toLocalInputValue } from '@/utils/dateLocal';
 import { applyDiscount } from '@/utils/discounts';
@@ -107,7 +108,7 @@ export function useClassForm({
     }
 
     const normalizedDate = fromLocalInputValue(date);
-    const normalizedDuration = Math.max(1, durationHours);
+    const normalizedDuration = snapDurationHours(durationHours);
     const overlapping = findOverlappingClass(classes, normalizedDate, normalizedDuration, classItem?.id);
 
     if (overlapping) {

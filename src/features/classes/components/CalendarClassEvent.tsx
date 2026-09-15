@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { formatDurationMinutes } from '@/features/classes/utils/calendarFormats';
+import { durationHoursToMinutes } from '@/features/classes/utils/slotDuration';
 import type { ClassCalendarEvent } from '@/features/classes/hooks/useCalendarView';
 import type { Class, ClassPaymentStatus } from '@/types';
 import { CLASS_PAYMENT_STATUS_OPTIONS } from '@/utils/classStatus';
@@ -27,6 +29,14 @@ function SubjectNameBadge({ color, name }: { color: string; name: string }) {
   return (
     <span className="scheduly-calendar-event-subject" style={{ backgroundColor: color }}>
       {name}
+    </span>
+  );
+}
+
+function EventDurationBadge({ minutes }: { minutes: number }) {
+  return (
+    <span aria-label={`Duración: ${minutes} minutos`} className="scheduly-calendar-event-duration">
+      {formatDurationMinutes(minutes)}
     </span>
   );
 }
@@ -111,6 +121,7 @@ export function CalendarClassEvent({
 }: CalendarClassEventProps) {
   const classItem = event.resource;
   const timeRange = showTimeRange ? formatTimeRange(event.start, event.end) : null;
+  const durationMinutes = durationHoursToMinutes(classItem.durationHours);
   const statusSelect = hideStatus ? null : (
     <CalendarPaymentStatusSelect classItem={classItem} onPaymentStatusChange={onPaymentStatusChange} />
   );
@@ -129,6 +140,7 @@ export function CalendarClassEvent({
           subjectColor={event.subjectColor}
           subjectName={event.subjectName}
         />
+        {timeView ? <EventDurationBadge minutes={durationMinutes} /> : null}
       </div>
     );
   }

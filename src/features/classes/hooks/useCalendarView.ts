@@ -126,13 +126,16 @@ export function useCalendarView({
 
   const slotPropGetter: SlotPropGetter = (date) => {
     const hourParity = date.getHours() % 2 === 0 ? 'even' : 'odd';
-    const isHourStart = date.getMinutes() === 0;
+    const minutes = date.getMinutes();
+    const isHourStart = minutes === 0;
+    const isHalfHour = minutes === 30;
 
     return {
       className: [
         'scheduly-hour-slot',
         `scheduly-hour-${hourParity}`,
         isHourStart ? 'scheduly-hour-boundary' : '',
+        isHalfHour ? 'scheduly-half-hour-boundary' : '',
       ]
         .filter(Boolean)
         .join(' '),

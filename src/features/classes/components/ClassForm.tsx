@@ -9,6 +9,11 @@ import type { ClassInput } from '@/features/classes/api/classes-api';
 import { useClassForm } from '@/features/classes/hooks/useClassForm';
 import { StudentSearchBar } from '@/components/StudentSearchBar';
 import type { Class, ClassPaymentStatus, Student, Subject } from '@/types';
+import {
+  CALENDAR_TIME_INPUT_STEP_SECONDS,
+  CLASS_DURATION_STEP_HOURS,
+  MIN_CLASS_DURATION_HOURS,
+} from '@/config/constants';
 import { CLASS_PAYMENT_STATUS_OPTIONS } from '@/utils/classStatus';
 import { formatContacts } from '@/utils/contacts';
 import { formatCurrency } from '@/utils/format';
@@ -88,6 +93,7 @@ export function ClassForm({
                 id="class-date"
                 onChange={(event) => setDate(event.target.value)}
                 required
+                step={CALENDAR_TIME_INPUT_STEP_SECONDS}
                 type="datetime-local"
                 value={date}
               />
@@ -97,12 +103,14 @@ export function ClassForm({
               <Label htmlFor="class-duration">Duración en horas</Label>
               <Input
                 id="class-duration"
-                min={1}
+                min={MIN_CLASS_DURATION_HOURS}
                 onChange={(event) => setDurationHours(Number(event.target.value))}
                 required
+                step={CLASS_DURATION_STEP_HOURS}
                 type="number"
                 value={durationHours}
               />
+              <p className="text-xs text-muted-foreground">En bloques de 15 minutos (0,25 h).</p>
             </div>
           </div>
 

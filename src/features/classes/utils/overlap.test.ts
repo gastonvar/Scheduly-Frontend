@@ -47,6 +47,13 @@ describe('findOverlappingClass', () => {
     expect(findOverlappingClass(classes, '2026-07-01T10:30:00.000Z', 1, 'a')).toBeUndefined();
     expect(findOverlappingClass(classes, '2026-07-01T13:00:00.000Z', 1)).toBeUndefined();
   });
+
+  it('detects overlaps for 15-minute classes', () => {
+    const classes = [makeClass({ id: 'a', date: '2026-07-01T10:00:00.000Z', durationHours: 0.25 })];
+
+    expect(findOverlappingClass(classes, '2026-07-01T10:00:00.000Z', 0.25)?.id).toBe('a');
+    expect(findOverlappingClass(classes, '2026-07-01T10:15:00.000Z', 0.25)).toBeUndefined();
+  });
 });
 
 describe('findOverlappingClassInRange', () => {

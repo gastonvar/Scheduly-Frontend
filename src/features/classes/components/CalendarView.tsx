@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { dateFnsLocalizer, Views } from 'react-big-calendar';
 import type { Components, View } from 'react-big-calendar';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CALENDAR_SLOT_MINUTES, CALENDAR_TIMESLOTS_PER_HOUR } from '@/config/constants';
 import { CalendarClassEvent, CalendarPaymentStatusSelect } from '@/features/classes/components/CalendarClassEvent';
 import { DnDCalendar } from '@/features/classes/components/dndCalendar';
-import { formatCalendarSelectRange } from '@/features/classes/utils/calendarFormats';
+import { formatCalendarSelectDuration, formatCalendarSelectRange } from '@/features/classes/utils/calendarFormats';
 import { useCalendarView } from '@/features/classes/hooks/useCalendarView';
 import type { ClassCalendarEvent, ClassRescheduleInput } from '@/features/classes/hooks/useCalendarView';
 import type { Class, ClassPaymentStatus, Student, Subject } from '@/types';
@@ -107,6 +108,16 @@ export function CalendarView({
     subjects,
   });
 
+  const calendarRootRef = useRef<HTMLDivElement>(null);
+
+  function handleSelectingWithDuration(range: { start: Date; end: Date }) {
+    calendarRootRef.current?.style.setProperty(
+      '--scheduly-select-minutes',
+      `"${formatCalendarSelectDuration(range)}"`,
+    );
+    return handleSelecting(range);
+  }
+
   const calendarComponents = useMemo<Components<ClassCalendarEvent>>(() => {
     const changePaymentStatus = (classItem: Class, status: ClassPaymentStatus) => {
       void handlePaymentStatusChange(classItem, status);
@@ -201,7 +212,10 @@ export function CalendarView({
         </div>
       ) : null}
 
-      <div className="flex min-h-[20rem] flex-1 overflow-hidden rounded-xl border border-border bg-card">
+      <div
+        ref={calendarRootRef}
+        className="flex min-h-[20rem] flex-1 overflow-hidden rounded-xl border border-border bg-card"
+      >
         <DnDCalendar
           allDayMaxRows={0}
           className="scheduly-calendar h-full min-h-[20rem] w-full border-0"
@@ -223,12 +237,14 @@ export function CalendarView({
           scrollToTime={scrollToCalendarTime}
           onSelectEvent={(event) => onEditClass(event.resource)}
           onSelectSlot={handleSelectSlot}
-          onSelecting={handleSelecting}
+          onSelecting={handleSelectingWithDuration}
           onView={handleView}
           resizable={isEventResizable()}
           selectable
           slotPropGetter={slotPropGetter}
           startAccessor="start"
+          step={CALENDAR_SLOT_MINUTES}
+          timeslots={CALENDAR_TIMESLOTS_PER_HOUR}
           view={view}
           views={calendarViews}
         />

@@ -29,4 +29,24 @@ describe('computeClassPrice', () => {
       finalPrice: 1100,
     });
   });
+
+  it('prices quarter-hour durations without rounding up to a full hour', () => {
+    const subject: Subject = {
+      id: 's1',
+      name: 'Prog',
+      pricePerHour: 400,
+      color: 'oklch(0.5 0.1 200)',
+    };
+
+    expect(computeClassPrice(subject, 0.25, 0)).toEqual({
+      basePrice: 100,
+      surchargePercent: 0,
+      finalPrice: 100,
+    });
+    expect(computeClassPrice(subject, 1.5, 0)).toEqual({
+      basePrice: 600,
+      surchargePercent: 0,
+      finalPrice: 600,
+    });
+  });
 });
