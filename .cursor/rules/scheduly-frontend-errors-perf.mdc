@@ -1,0 +1,23 @@
+---
+description: Error handling and performance conventions for the Scheduly frontend
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Errors And Performance
+
+## Errors
+
+- Map HTTP failures in `src/lib/api-error.ts`. Routes and views render Spanish messages. Use toasts (`sonner`) for mutation failures when the view has no inline slot.
+- Expected empty lists are empty states, not errors. API downtime is an error (`NETWORK_ERROR`).
+- Put an error boundary around the app so one crash does not take down the SPA. Data routes still own loading, empty, and error UI.
+- Do not log personal student data, contact values, CSRF tokens, or cookies in error payloads.
+- Error boundaries catch render crashes, not expected 4xx JSON. Do not add a boundary that swallows form validation.
+
+## Performance
+
+- Lazy-load heavy routes with `React.lazy` + `Suspense`. Split at the route boundary.
+- Keep the calendar (`react-big-calendar` + DnD) and Recharts behind the views that need them.
+- Colocate state to cut extra rerenders. Do not wrap everything in `useMemo` / `useCallback`.
+- Full collection load is fine at current tutor scale. Do not add pagination unless asked.
+- Keep query `staleTime` and retries in `src/lib/query-client.ts`.

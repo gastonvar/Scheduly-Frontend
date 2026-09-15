@@ -1,0 +1,22 @@
+---
+description: Testing conventions for the Scheduly frontend
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Testing
+
+Prefer tests that exercise user-visible behavior over implementation details.
+
+## Pyramid
+
+1. **Unit** — shared utils and non-trivial pure logic (pricing, discounts, overlap, dashboard metrics, student balance). Current tests are in this layer.
+2. **Integration** — feature workflows with Testing Library when those tests exist.
+3. **E2E** — critical journeys only, when those tests exist.
+
+## Patterns
+
+- Co-locate as `*.test.ts(x)` next to the module.
+- Keep existing unit tests running with `npm run test` (Vitest, node environment).
+- Do not assert internals or CSS class names in UI tests.
+- If HTTP tests are added later, use MSW through `apiClient`. Do not mock Axios modules.

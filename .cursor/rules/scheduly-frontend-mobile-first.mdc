@@ -1,0 +1,36 @@
+---
+description: Mobile-first layout and tap targets for Scheduly screens
+globs: src/**/*.{tsx,css}
+alwaysApply: false
+---
+
+# Mobile First
+
+Design the phone layout first. Desktop is an enhancement at `lg`, not the default squeezed down.
+
+## Layout
+
+- Default to a **single column**. Two-column grids and the persistent sidebar only from `lg:` up.
+- Existing chrome: compact header + left `Sheet` below `lg`; `aside` sidebar `hidden lg:flex lg:w-56`. Do not add a bottom tab bar unless asked.
+- Glanceable facts first on small screens (who, when, money, primary action). Filters and secondary blocks after.
+- `min-w-0` on flex/grid children so long names and amounts do not overflow.
+
+```tsx
+// ❌ sidebar always in the flow
+<div className="flex"><aside className="w-56">...</aside><main>...</main></div>
+
+// ✅ sheet on phone, aside from lg (as in AppLayout)
+<header className="lg:hidden">...</header>
+<aside className="hidden lg:flex lg:w-56">...</aside>
+```
+
+## Controls
+
+- Primary actions **full width** on mobile (`w-full`), `sm:w-auto` after that.
+- Tap targets at least `min-h-11`. Do not ship `h-9` chips as the only way to switch views on a phone.
+- Dialogs already used as modals; keep them usable on a narrow screen (scroll, full-width actions). Do not nest a second back control next to the header menu.
+- Dense tables and multi-field filter rows: stack or collapse below `md`; keep the list scannable.
+
+## Desktop-only
+
+- Persistent sidebar, week/month calendar grid density, wide filter rows: `lg:` / `md:` as today.

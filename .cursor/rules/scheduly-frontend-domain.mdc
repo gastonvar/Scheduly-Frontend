@@ -1,0 +1,42 @@
+---
+description: Domain models, pricing, referrals, and API contract for Scheduly
+globs: src/{types,utils,config,features,lib}/**/*
+alwaysApply: false
+---
+
+# Scheduly Domain
+
+## Entities (`src/types/index.ts`)
+
+- **Contact**: `{ id, type: 'Email' | 'Phone' | 'WhatsApp' | 'Discord', value }` — nested on the student, not flat email/phone
+- **Student**: name, contacts, referredBy, referrals, discountPercent (0–50, persisted by the backend)
+- **Subject**: name, pricePerHour (multiple of 50, min 0), color
+- **Class**: date (ISO), durationHours (≥1), subjectId, attendees, `paymentStatus: 'paid' | 'unpaid' | 'free'`, basePrice, surchargePercent, finalPrice
+- **User**: auth session shape from `/api/auth/me`
+
+## Pricing (`src/utils/pricing.ts`, `src/config/constants.ts`)
+
+- `PRICE_BASE=350`, `PRICE_STEP=50`
+- Manual `surchargePercent` on each class (no automatic weekend surcharge)
+- Class stores `basePrice` and `finalPrice` as session totals
+- Payment helpers: `src/utils/classPayment.ts`
+
+## Referrals (`src/utils/discounts.ts`)
+
+- Helpers are for **display/preview** in forms and lists
+- Referrer earns +10% per referred student with ≥1 **paid** class; cap 50%
+- The backend persists `discountPercent` and cascades. Do not PATCH students from class hooks
+
+## API
+
+- Base: `VITE_API_URL` (no trailing slash). Paths include `/api/...`
+- Envelope `{ data: T }`. Lists `{ data: T[] }` with no pagination. DELETE 204
+- Auth: `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`
+- CRUD: `/api/students`, `/api/subjects`, `/api/classes` (and `/:id`)
+- Payment: `PATCH /api/classes/:classId/payment-status { paymentStatus }`
+- Health: `GET /api/health`
+- Deleting a student/subject: one DELETE; show an `AlertDialog` of affected classes from local query data before confirm
+
+## Formatting (`src/utils/format.ts`)
+
+- `formatCurrency`, `formatDate`, `formatTime` — always `es-UY`

@@ -1,0 +1,34 @@
+---
+description: Scheduly frontend stack, layout, and workspace conventions
+alwaysApply: true
+---
+
+# Scheduly Frontend
+
+Tutor management SPA (Uruguay, university students). This package is `frontend/` in the Scheduly workspace. Do not copy QRly domain (locales, QR, Mercado Pago) or AlgoRico domain (MinIO, pastry orders).
+
+## Stack
+
+- **React 19** + **TypeScript** + **Vite**
+- **React Router v7**, **TanStack Query**, **Axios** (`apiClient`), **Zod**
+- **React Hook Form** on login (existing entity forms may stay custom)
+- **Zustand** only for the auth session (`src/lib/auth-store.ts`)
+- **Tailwind CSS v4**, shadcn / Base UI, lucide-react, date-fns, react-big-calendar, recharts, sonner
+
+There is no json-server in this package. The API runs on the host at port **4001**.
+
+## Local run
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:5173`, not `http://127.0.0.1:5173`. API base URL is `VITE_API_URL` (see `.env.example`). Before finishing work: `npm run typecheck`, `npm run test`, and `npm run build`.
+
+## Conventions
+
+- **Language**: Spanish (Uruguay) for UI copy, labels, and errors
+- **Currency**: `$1.350 UYU` via `formatCurrency` (`es-UY`)
+- **Theme**: dark mode, violet accent (`--primary` in `src/index.css`)
+- **Imports**: `@/` alias only — no relative paths that cross top-level `src` folders
+- **API URL**: `src/config/env.ts` from `VITE_API_URL` — never hardcode hosts

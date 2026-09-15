@@ -1,0 +1,38 @@
+---
+description: Bulletproof React API layer for Scheduly feature fetchers and query hooks
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Bulletproof API Layer
+
+One configured Axios instance (`src/lib/api-client.ts`). Declare every endpoint; never inline `apiClient.get` inside a route or component.
+
+## Per endpoint
+
+Each call has:
+
+1. Request/response types and Zod schemas where the contract can drift.
+2. A fetcher that uses `apiClient` and `unwrapData`.
+3. A TanStack Query hook that calls the fetcher.
+
+Keep HTTP in `features/<domain>/api`. Keep hooks in `features/<domain>/hooks`. Routes only consume hooks.
+
+```ts
+export async function getStudents(): Promise<Student[]> {
+  const response = await apiClient.get<ApiEnvelope<unknown>>('/api/students')
+  return parseStudents(unwrapData(response))
+}
+
+export function useStudents() {
+  return useQuery({
+    queryKey: queryKeys.students.list,
+    queryFn: getStudents,
+  })
+}
+```
+
+- Paths include `/api/...`. Do not call json-server-style `/students`.
+- Mutations call `queryClient.invalidateQueries` for every stale key family (including related resources the backend may cascade).
+- Do not generate entity ids on the client before POST.
+- Do not mock `fetch`/`axios` in tests unless a testing stack with MSW is added.

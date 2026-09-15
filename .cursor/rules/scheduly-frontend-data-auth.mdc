@@ -1,0 +1,20 @@
+---
+description: Scheduly frontend API, auth, and TanStack Query conventions
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Scheduly Frontend Data And Auth
+
+- Use `src/lib/api-client.ts` for backend calls; never create ad hoc Axios clients or hardcode `localhost`.
+- Read the backend base URL through `VITE_API_URL` via `src/config/env.ts` (default `http://localhost:4001`).
+- Keep session, CSRF, and storage access centralized (`auth-store` / `cookies`); do not log or render tokens.
+- Cookie name: `scheduly.csrf`. Header: `x-csrf-token`.
+- Let `api-client` send cookies (`withCredentials`), attach CSRF on unsafe methods, and clear the session on `401` (except login/`/me` probes).
+- Logout must hit `POST /api/auth/logout` before clearing local session.
+- Envelope: `{ data: T }`. Lists are full arrays (no pagination). DELETE returns 204.
+- Put API functions in `features/<domain>/api` and TanStack Query hooks in `features/<domain>/hooks`.
+- Query keys live in `src/lib/query-keys.ts` (`currentUser`, `students`, `subjects`, `classes`). Invalidate affected keys after every mutation.
+- Payment toggles use `PATCH /api/classes/:classId/payment-status`. Do not PATCH `paymentStatus` as a generic class update.
+- Use `getErrorMessage` for backend errors, especially `401`, `403`, `404`, and `409`.
+- Zod-parse payloads at the API boundary (`src/types/schemas.ts`).

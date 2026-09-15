@@ -1,0 +1,31 @@
+---
+description: Scheduly frontend UI, forms, accessibility, and verification
+globs: src/**/*.{tsx,css}
+alwaysApply: false
+---
+
+# Scheduly Frontend UI, Forms, And Quality
+
+- Build screens with primitives in `src/components/ui` before adding new ones. Merge classes with `cn()` from `@/lib/utils`. Icons from `lucide-react`.
+- Tailwind only; tokens via CSS variables in `src/index.css` (`.dark` theme).
+- User-facing copy is Spanish (Uruguay). Keep labels, toasts, loading, empty, and error states consistent.
+- Compound components only where subparts share state (`Dialog.Root`, `Tabs.Trigger`, `ClassFilters.StudentField`). Simple one-offs take explicit props.
+- Login uses React Hook Form + Zod. Existing student/subject/class forms may stay custom until migrated. Do not claim RHF on every form.
+- Every data-driven view handles loading, empty, and error. Destructive actions use `AlertDialog`.
+- Accessible controls: labels, button `type`, keyboard-friendly behavior.
+- Phone layout is the default; `lg` is enhancement. See `scheduly-frontend-mobile-first.mdc`.
+- Before finishing substantive UI changes, run `npm run typecheck`, `npm run test`, and `npm run build`, and verify the flow in the browser.
+
+## Scheduly-specific chrome
+
+- Paid status: green = pagada, orange/destructive = pendiente, yellow = gratis — keep toggles prominent.
+- Discount badges: violet when `discountPercent > 0`.
+- Forms: `Dialog` + `Label` + `Input` + `Select` + `Switch`. Show API errors in Spanish.
+- Class form: ≥1 subject and ≥1 attendee; subject price multiples of $50 UYU.
+- Student form: ≥1 contact with non-empty `value`; contacts are `{ id, type, value }[]`.
+- Do not hardcode login credentials in the UI.
+
+## Calendar
+
+- `react-big-calendar` + `date-fns` localizer, `es` locale, week starts Monday.
+- Calendar CSS in `src/index.css` via `.rbc-*`. Do not restyle from a feature file.

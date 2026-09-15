@@ -1,0 +1,24 @@
+---
+description: State layers for the Scheduly frontend — local, auth, server, form, and URL
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Scheduly Frontend State
+
+Do not put all state in one store. Pick the layer that matches the data.
+
+## Layers
+
+1. **Component state** — `useState` for independent UI (open dialog, sidebar sheet). `useReducer` when one action updates several fields. Start local; lift only when siblings need it.
+2. **Auth session** — Zustand in `src/lib/auth-store.ts` for `user` / `csrfToken` only. Never duplicate students, subjects, or classes in Zustand.
+3. **Server state** — TanStack Query only. Feature hooks (`use-students`, `use-subjects`, `use-classes`) load and mutate collections.
+4. **Form state** — React Hook Form + Zod on login. Existing student/subject/class forms may keep custom `use*Form` hooks until they are migrated.
+5. **URL state** — React Router for the current screen (`/inicio`, `/alumnos`, `/materias`, `/calendario`, `/clases`, `/saldos`). Do not use `useState<View>`.
+
+## Rules of thumb
+
+- The API is the source of truth for students, subjects, and classes.
+- Mutations hit the API, then invalidate query keys. Do not keep a second in-memory copy to “stay in sync”.
+- Derived metrics (dashboard, balances, discount **previews**) are pure functions over loaded data, not extra stored entities.
+- Expensive initial values use a state initializer: `useState(() => compute())`.

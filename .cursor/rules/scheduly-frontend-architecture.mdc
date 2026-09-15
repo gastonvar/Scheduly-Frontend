@@ -1,0 +1,47 @@
+---
+description: Bulletproof React feature architecture for the Scheduly frontend
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Scheduly Frontend Architecture
+
+Follow Bulletproof React with strict feature boundaries. Most code lives in `src/features`; shared code stays thin.
+
+## Unidirectional flow
+
+Code flows **shared → features → app** only:
+
+- Shared (`components`, `hooks`, `lib`, `config`, `types`, `utils`) must not import from `features` or `app`.
+- Features may import shared code, never `app`. Feature `api/`, `components/`, and non-route `hooks/` must not import other features.
+- Route files may compose sibling feature query hooks when a screen needs related entities (lists, calendar, dashboard, saldos).
+- `app` may import features and shared code to compose the router, layout, and providers.
+
+Do not create a feature subfolder until it is needed. Put feature-only assets and utils inside that feature.
+
+## Folder layout
+
+- `src/features/<domain>/` — `api`, `hooks`, `routes`, `components`, optional `schemas`, `types`, `utils`.
+- `src/app/` — providers, router, layouts, error boundary, not-found. Cross-feature modals can live here if several routes share them.
+- `src/components/` — shared UI (shadcn/Base UI and app primitives). No feature imports.
+- `src/lib/` — api client, query client, auth store, cookies, error helpers.
+- `src/config/` — validated env (`VITE_API_URL`) and pricing constants.
+- `src/types/` — shared backend entity models and Zod parsers.
+- `src/utils/` — shared pure helpers (pricing, discounts for **display/preview only**, format, overlap helpers used across views).
+
+## Import boundaries
+
+- Features **must not** import from `app`.
+- `src/components/**` **must not** import from `src/features/**`.
+- `src/lib/**` **must not** import from features.
+- Prefer direct imports; avoid barrel `index.ts` files.
+- Absolute `@/` imports.
+- New files: `kebab-case`. Existing UI components may remain `PascalCase`. Hooks are `useX` or `use-kebab-case.ts`. Components are `PascalCase`.
+
+## Data and UI patterns
+
+- Keep routes thin; HTTP in `api/`, TanStack Query in `hooks/`. Login uses Zod + React Hook Form; other forms may stay custom.
+- Backend assigns UUIDs. Do not send `crypto.randomUUID()` as entity ids on POST.
+- Backend owns referral discounts and delete cascades. Do not PATCH related rows from the client after create/delete.
+- Co-locate tests as `*.test.ts` next to the module.
+- TypeScript strict. Define types before implementation.
