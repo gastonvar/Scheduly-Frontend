@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
+import { PageHeader } from '@/components/common/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -52,16 +53,52 @@ type KpiCardProps = {
 
 function KpiCard({ title, value, description, icon: Icon, accent = 'text-primary' }: KpiCardProps) {
   return (
-    <Card className="ring-1 ring-foreground/10">
+    <Card className="min-w-0 ring-1 ring-foreground/10">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
-          <CardDescription>{title}</CardDescription>
+          <CardDescription className="min-w-0 leading-snug">{title}</CardDescription>
           <Icon className={`size-4 shrink-0 ${accent}`} />
         </div>
-        <CardTitle className="text-2xl font-bold tabular-nums">{value}</CardTitle>
+        <CardTitle className="text-xl font-bold tabular-nums sm:text-2xl">{value}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
     </Card>
+  );
+}
+
+function UpcomingClassCard({
+  attendees,
+  date,
+  statusClassName,
+  statusColor,
+  statusLabel,
+  subject,
+  time,
+}: {
+  attendees: string;
+  date: string;
+  statusClassName: string;
+  statusColor: string;
+  statusLabel: string;
+  subject: string;
+  time: string;
+}) {
+  return (
+    <article
+      className="min-w-0 rounded-xl border bg-card p-3"
+      style={{ borderLeftWidth: 4, borderLeftColor: statusColor }}
+    >
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="truncate font-medium">{subject}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {date} · {time}
+          </p>
+          {attendees ? <p className="mt-1 truncate text-xs text-muted-foreground">{attendees}</p> : null}
+        </div>
+        <Badge className={statusClassName}>{statusLabel}</Badge>
+      </div>
+    </article>
   );
 }
 
@@ -100,24 +137,25 @@ export function DashboardView({
   studentNames,
 }: DashboardViewProps) {
   return (
-    <section className="space-y-6">
+    <section className="space-y-5 sm:space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Inicio</h1>
-          <p className="text-sm text-muted-foreground">
-            Métricas, ingresos y actividad según el período seleccionado.
-          </p>
+        <div className="min-w-0">
+          <PageHeader
+            description="Métricas, ingresos y actividad según el período seleccionado."
+            title="Inicio"
+          />
           {loading ? <p className="mt-1 text-sm text-muted-foreground">Cargando métricas...</p> : null}
           {error ? <p className="mt-1 text-sm text-destructive">{error}</p> : null}
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="space-y-1.5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-end lg:flex">
+          <div className="min-w-0 space-y-1.5">
             <Label htmlFor="dashboard-from" className="flex items-center gap-1.5 text-xs">
               <CalendarRange className="size-3.5" />
               Desde
             </Label>
             <Input
+              className="w-full"
               id="dashboard-from"
               max={dateRange.to}
               onChange={(event) => onDateRangeChange({ ...dateRange, from: event.target.value })}
@@ -125,11 +163,12 @@ export function DashboardView({
               value={dateRange.from}
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <Label htmlFor="dashboard-to" className="text-xs">
               Hasta
             </Label>
             <Input
+              className="w-full"
               id="dashboard-to"
               min={dateRange.from}
               onChange={(event) => onDateRangeChange({ ...dateRange, to: event.target.value })}
@@ -140,7 +179,7 @@ export function DashboardView({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <KpiCard
           accent="text-primary"
           description={`${metrics.paidClasses} pagadas · ${metrics.unpaidClasses} pendientes`}
@@ -171,7 +210,7 @@ export function DashboardView({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <KpiCard
           description={`Duración promedio ${metrics.averageClassDuration} h`}
           icon={BookOpen}
@@ -198,7 +237,7 @@ export function DashboardView({
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         <Card className="ring-1 ring-foreground/10">
           <CardHeader>
             <CardTitle>Ingresos por semana</CardTitle>
@@ -327,44 +366,61 @@ export function DashboardView({
 
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground">Próximas clases</h2>
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
-          {metrics.upcomingClasses.length === 0 ? (
-            <p className="p-6 text-sm text-muted-foreground">No hay clases en los próximos 7 días.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Materia</TableHead>
-                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
-                  <TableHead>Hora</TableHead>
-                  <TableHead className="hidden md:table-cell">Asistentes</TableHead>
-                  <TableHead>Estado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {metrics.upcomingClasses.map((classItem) => (
-                  <TableRow
-                    className="border-l-4"
-                    key={classItem.id}
-                    style={{ borderLeftColor: classStatusBorderColor(classItem) }}
-                  >
-                    <TableCell className="font-medium">{subjectName(classItem.subjectId)}</TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">
-                      {formatDate(classItem.date)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatTime(classItem.date)}</TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">
-                      {studentNames(classItem.attendees) || 'Sin asistentes'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={classStatusClassName(classItem)}>{classStatusLabel(classItem)}</Badge>
-                    </TableCell>
+        {metrics.upcomingClasses.length === 0 ? (
+          <p className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+            No hay clases en los próximos 7 días.
+          </p>
+        ) : (
+          <>
+            <ul className="space-y-2 md:hidden">
+              {metrics.upcomingClasses.map((classItem) => (
+                <li key={classItem.id}>
+                  <UpcomingClassCard
+                    attendees={studentNames(classItem.attendees)}
+                    date={formatDate(classItem.date)}
+                    statusClassName={classStatusClassName(classItem)}
+                    statusColor={classStatusBorderColor(classItem)}
+                    statusLabel={classStatusLabel(classItem)}
+                    subject={subjectName(classItem.subjectId)}
+                    time={formatTime(classItem.date)}
+                  />
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Materia</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Hora</TableHead>
+                    <TableHead className="hidden lg:table-cell">Asistentes</TableHead>
+                    <TableHead>Estado</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
+                </TableHeader>
+                <TableBody>
+                  {metrics.upcomingClasses.map((classItem) => (
+                    <TableRow
+                      className="border-l-4"
+                      key={classItem.id}
+                      style={{ borderLeftColor: classStatusBorderColor(classItem) }}
+                    >
+                      <TableCell className="font-medium">{subjectName(classItem.subjectId)}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatDate(classItem.date)}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatTime(classItem.date)}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-muted-foreground">
+                        {studentNames(classItem.attendees) || 'Sin asistentes'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={classStatusClassName(classItem)}>{classStatusLabel(classItem)}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="space-y-4">

@@ -112,11 +112,19 @@ textarea {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
-    @apply font-sans;
+    @apply scroll-smooth font-sans;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  button,
+  [role="button"],
+  a,
+  input,
+  textarea,
+  select {
+    @apply touch-manipulation;
   }
   select {
     color-scheme: dark;
@@ -130,6 +138,64 @@ textarea {
 .scheduly-calendar {
   color: var(--foreground);
   background: var(--card);
+}
+
+.scheduly-calendar-toolbar {
+  z-index: 5;
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklch, var(--card) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.scheduly-calendar-view-switch {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--muted);
+}
+
+.scheduly-calendar-period-controls {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.scheduly-calendar-period-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding-inline: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.scheduly-calendar-overview-day--paid {
+  background: color-mix(in oklch, var(--class-status-paid) 28%, transparent);
+  color: var(--foreground);
+}
+
+.scheduly-calendar-overview-day--unpaid {
+  background: color-mix(in oklch, var(--class-status-unpaid) 30%, transparent);
+  color: var(--foreground);
+}
+
+.scheduly-calendar-overview-day--free {
+  background: color-mix(in oklch, var(--class-status-free) 32%, transparent);
+  color: var(--foreground);
 }
 
 .scheduly-calendar .rbc-toolbar {
@@ -470,6 +536,10 @@ textarea {
   gap: 0.75rem;
 }
 
+.scheduly-calendar .scheduly-calendar-agenda-meta {
+  display: none;
+}
+
 .scheduly-calendar .scheduly-calendar-agenda-event .scheduly-calendar-event-content {
   flex: 1 1 auto;
   height: auto;
@@ -589,6 +659,27 @@ textarea {
 }
 
 @media (min-width: 1024px) {
+  .scheduly-calendar-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .scheduly-calendar-view-switch {
+    display: inline-flex;
+    width: auto;
+  }
+
+  .scheduly-calendar-period-controls {
+    min-width: min(100%, 25rem);
+  }
+
+  .scheduly-calendar-period-label {
+    text-align: left;
+  }
+
   .scheduly-calendar .rbc-time-content .rbc-timeslot-group {
     min-height: 6rem;
   }
@@ -625,18 +716,106 @@ textarea {
 }
 
 @media (max-width: 640px) {
-  .scheduly-calendar .rbc-toolbar {
-    align-items: stretch;
-    flex-direction: column;
+  .scheduly-calendar .rbc-time-header-content {
+    min-width: 0;
   }
 
-  .scheduly-calendar .rbc-btn-group {
+  .scheduly-calendar .rbc-time-gutter,
+  .scheduly-calendar .rbc-time-header-gutter {
+    width: 3.25rem;
+    max-width: 3.25rem;
+    font-size: 0.6875rem;
+  }
+
+  .scheduly-calendar .rbc-time-view .scheduly-calendar-payment-select {
+    display: none;
+  }
+
+  .scheduly-calendar .rbc-agenda-view {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .scheduly-calendar .rbc-agenda-table {
+    display: block;
     width: 100%;
+    border: 0;
+    font-size: 0.8125rem;
   }
 
-  .scheduly-calendar .rbc-btn-group button {
-    flex: 1;
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+  .scheduly-calendar .rbc-agenda-table thead {
+    display: none;
+  }
+
+  .scheduly-calendar .rbc-agenda-table tbody {
+    display: grid;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.625rem;
+  }
+
+  .scheduly-calendar .rbc-agenda-table tbody > tr {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-left-width: 0.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  .scheduly-calendar .rbc-agenda-table tbody > tr.scheduly-calendar-event-paid {
+    border-left-color: var(--class-status-paid);
+    background: var(--background);
+  }
+
+  .scheduly-calendar .rbc-agenda-table tbody > tr.scheduly-calendar-event-unpaid {
+    border-left-color: var(--class-status-unpaid);
+    background: var(--background);
+  }
+
+  .scheduly-calendar .rbc-agenda-table tbody > tr.scheduly-calendar-event-free {
+    border-left-color: var(--class-status-free);
+    background: var(--background);
+  }
+
+  .scheduly-calendar .rbc-agenda-date-cell,
+  .scheduly-calendar .rbc-agenda-time-cell {
+    display: none;
+  }
+
+  .scheduly-calendar .rbc-agenda-event-cell {
+    display: block;
+    width: 100%;
+    border: 0;
+    padding: 0.75rem;
+  }
+
+  .scheduly-calendar .scheduly-calendar-agenda-event {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .scheduly-calendar .scheduly-calendar-agenda-event .scheduly-calendar-event-attendees {
+    color: var(--muted-foreground);
+  }
+
+  .scheduly-calendar .scheduly-calendar-agenda-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .scheduly-calendar .scheduly-calendar-agenda-event .scheduly-calendar-payment-select {
+    width: 100%;
+    min-height: 2.75rem;
+    max-width: none;
   }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Views } from 'react-big-calendar';
 import type { EventPropGetter, SlotInfo, SlotPropGetter, View } from 'react-big-calendar';
 import {
@@ -94,6 +94,18 @@ function classesToEvents(classes: Class[], subjects: Subject[], students: Studen
   });
 }
 
+function defaultCalendarView(): View {
+  if (typeof window === 'undefined') {
+    return Views.WEEK;
+  }
+
+  return window.matchMedia('(min-width: 1024px)').matches ? Views.WEEK : Views.DAY;
+}
+
+function defaultDesktopState(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
+}
+
 export function useCalendarView({
   classes,
   onCreateForSlot,
@@ -103,12 +115,30 @@ export function useCalendarView({
   subjects,
 }: UseCalendarViewParams) {
   const [date, setDate] = useState(() => new Date());
-  const [view, setView] = useState<View>(Views.WEEK);
+  const [view, setView] = useState<View>(defaultCalendarView);
+  const [isDesktop, setIsDesktop] = useState(defaultDesktopState);
   const [slotError, setSlotError] = useState<string | null>(null);
   const [optimisticMoves, setOptimisticMoves] = useState<Record<string, ClassOptimisticMove>>({});
   const [optimisticPaymentStatus, setOptimisticPaymentStatus] = useState<ClassOptimisticPaymentStatus>(
     {},
   );
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+
+    function syncCalendarForViewport() {
+      setIsDesktop(media.matches);
+      if (!media.matches) {
+        setView((current) =>
+          current === Views.MONTH || current === Views.WEEK ? Views.DAY : current,
+        );
+      }
+    }
+
+    syncCalendarForViewport();
+    media.addEventListener('change', syncCalendarForViewport);
+    return () => media.removeEventListener('change', syncCalendarForViewport);
+  }, []);
 
   const displayClasses = useMemo(() => {
     const movedClasses = applyOptimisticMoves(classes, optimisticMoves);
@@ -218,11 +248,11 @@ export function useCalendarView({
   }
 
   function isEventDraggable() {
-    return view !== Views.AGENDA;
+    return isDesktop && view !== Views.AGENDA;
   }
 
   function isEventResizable() {
-    return view === Views.WEEK || view === Views.DAY;
+    return isDesktop && (view === Views.WEEK || view === Views.DAY);
   }
 
   function handleView(nextView: View) {
@@ -273,6 +303,7 @@ export function useCalendarView({
     handleView,
     isEventDraggable,
     isEventResizable,
+    isDesktop,
     slotError,
     slotPropGetter,
     view,

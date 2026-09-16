@@ -11,25 +11,26 @@ Design the phone layout first. Desktop is an enhancement at `lg`, not the defaul
 ## Layout
 
 - Default to a **single column**. Two-column grids and the persistent sidebar only from `lg:` up.
-- Existing chrome: compact header + left `Sheet` below `lg`; `aside` sidebar `hidden lg:flex lg:w-56`. Do not add a bottom tab bar unless asked.
+- Chrome: sticky header + **bottom tab bar** below `lg`; `aside` sidebar `hidden lg:flex`. Keep `env(safe-area-inset-*)` on header, tab bar, dialogs, and main padding.
 - Glanceable facts first on small screens (who, when, money, primary action). Filters and secondary blocks after.
 - `min-w-0` on flex/grid children so long names and amounts do not overflow.
+- Page titles live in the sticky header on mobile; keep in-page `h1` for `lg` via `PageHeader`.
 
 ```tsx
-// ❌ sidebar always in the flow
-<div className="flex"><aside className="w-56">...</aside><main>...</main></div>
+// ❌ hamburger sheet as the only phone nav
+<header className="lg:hidden"><Menu /></header>
 
-// ✅ sheet on phone, aside from lg (as in AppLayout)
-<header className="lg:hidden">...</header>
-<aside className="hidden lg:flex lg:w-56">...</aside>
+// ✅ bottom tabs on phone, aside from lg (as in AppLayout)
+<nav className="fixed inset-x-0 bottom-0 lg:hidden">...</nav>
+<aside className="hidden lg:flex">...</aside>
 ```
 
 ## Controls
 
 - Primary actions **full width** on mobile (`w-full`), `sm:w-auto` after that.
-- Tap targets at least `min-h-11`. Do not ship `h-9` chips as the only way to switch views on a phone.
-- Dialogs already used as modals; keep them usable on a narrow screen (scroll, full-width actions). Do not nest a second back control next to the header menu.
-- Dense tables and multi-field filter rows: stack or collapse below `md`; keep the list scannable.
+- Tap targets at least `min-h-11` / `h-11`. Do not ship `h-9` chips as the only way to switch views on a phone.
+- Dialogs and alert dialogs are **bottom sheets** below `sm`, centered modals from `sm` up. Full-width footer actions. Do not nest a second back control next to the header.
+- Dense tables and multi-field filter rows: stack or collapse below `md`; keep the list scannable with cards on the phone.
 
 ## Desktop-only
 

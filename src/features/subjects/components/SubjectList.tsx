@@ -1,9 +1,10 @@
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
+import { ItemActions } from '@/components/common/item-actions';
+import { PageHeader } from '@/components/common/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PriceDisplay } from '@/components/ui/PriceDisplay';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Subject } from '@/types';
 import { getSubjectColor } from '@/utils/subjectColor';
 
@@ -16,100 +17,113 @@ type SubjectListProps = {
   subjects: Subject[];
 };
 
+function SubjectCard({
+  onDelete,
+  onEdit,
+  subject,
+}: {
+  onDelete: (subject: Subject) => void;
+  onEdit: (subject: Subject) => void;
+  subject: Subject;
+}) {
+  return (
+    <article className="flex min-h-16 items-center gap-3 overflow-hidden rounded-xl border bg-card px-3 py-3 sm:px-4">
+      <span aria-hidden className="size-3 shrink-0 rounded-full" style={{ backgroundColor: getSubjectColor(subject) }} />
+      <button className="min-w-0 flex-1 text-left" onClick={() => onEdit(subject)} type="button">
+        <p className="truncate font-medium leading-snug">{subject.name}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          <PriceDisplay amount={subject.pricePerHour} />
+        </p>
+      </button>
+      <ItemActions
+        deleteLabel="Eliminar materia"
+        editLabel="Editar materia"
+        onDelete={() => onDelete(subject)}
+        onEdit={() => onEdit(subject)}
+      />
+    </article>
+  );
+}
+
 export function SubjectList({ error, loading, onCreate, onDelete, onEdit, subjects }: SubjectListProps) {
   return (
     <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Materias</h1>
-          <p className="text-sm text-muted-foreground">Definí precios por hora en múltiplos de $50 UYU.</p>
-        </div>
-        <Button onClick={onCreate}>
-          <Plus className="size-4" data-icon="inline-start" />
-          Nueva materia
-        </Button>
-      </div>
+      <PageHeader
+        actions={
+          <Button onClick={onCreate}>
+            <Plus className="size-4" data-icon="inline-start" />
+            Nueva materia
+          </Button>
+        }
+        description="Definí precios por hora en múltiplos de $50 UYU."
+        title="Materias"
+      />
 
-      {error && (
+      {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-      )}
+      ) : null}
 
-      {loading && (
+      {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" />
           Cargando...
         </div>
-      )}
+      ) : null}
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        {subjects.length === 0 && !loading ? (
-          <p className="p-6 text-sm text-muted-foreground">Todavía no hay materias cargadas.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10" />
-                <TableHead>Nombre</TableHead>
-                <TableHead>Precio por hora</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {subjects.map((subject) => (
-                <TableRow key={subject.id}>
-                  <TableCell>
-                    <span
-                      aria-hidden
-                      className="inline-block size-3 rounded-full"
-                      style={{ backgroundColor: getSubjectColor(subject) }}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{subject.name}</TableCell>
-                  <TableCell>
-                    <PriceDisplay amount={subject.pricePerHour} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              aria-label="Editar materia"
-                              onClick={() => onEdit(subject)}
-                              size="icon-sm"
-                              variant="ghost"
-                            />
-                          }
-                        >
-                          <Pencil className="size-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>Editar</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              aria-label="Eliminar materia"
-                              onClick={() => onDelete(subject)}
-                              size="icon-sm"
-                              variant="destructive"
-                            />
-                          }
-                        >
-                          <Trash2 className="size-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>Eliminar</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TableCell>
+      {subjects.length === 0 && !loading ? (
+        <p className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">Todavía no hay materias cargadas.</p>
+      ) : (
+        <>
+          <ul className="space-y-2 md:hidden">
+            {subjects.map((subject) => (
+              <li key={subject.id}>
+                <SubjectCard onDelete={onDelete} onEdit={onEdit} subject={subject} />
+              </li>
+            ))}
+          </ul>
+
+          <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10" />
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Precio por hora</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+              </TableHeader>
+              <TableBody>
+                {subjects.map((subject) => (
+                  <TableRow key={subject.id}>
+                    <TableCell>
+                      <span
+                        aria-hidden
+                        className="inline-block size-3 rounded-full"
+                        style={{ backgroundColor: getSubjectColor(subject) }}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{subject.name}</TableCell>
+                    <TableCell>
+                      <PriceDisplay amount={subject.pricePerHour} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <ItemActions
+                        className="justify-end"
+                        deleteLabel="Eliminar materia"
+                        editLabel="Editar materia"
+                        onDelete={() => onDelete(subject)}
+                        onEdit={() => onEdit(subject)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      )}
     </section>
   );
 }

@@ -146,7 +146,7 @@ export function ClassForm({
                 const contactsLabel = formatContacts(student.contacts);
                 return (
                   <button
-                    className={`rounded-lg border p-3 text-left transition ${
+                    className={`min-h-16 rounded-lg border p-3 text-left transition ${
                       selected ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-muted-foreground/30'
                     }`}
                     key={student.id}
@@ -229,7 +229,7 @@ export function ClassForm({
 
           <DialogFooter>
             {classItem && onDelete ? (
-              <Button className="mr-auto" onClick={() => onDelete(classItem)} type="button" variant="destructive">
+              <Button className="sm:mr-auto" onClick={() => onDelete(classItem)} type="button" variant="destructive">
                 Eliminar
               </Button>
             ) : null}

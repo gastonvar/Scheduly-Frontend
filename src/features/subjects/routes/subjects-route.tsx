@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { EntityDeleteDialog } from '@/components/common/entity-delete-dialog';
 import { useClasses } from '@/features/classes/hooks/use-classes';
@@ -24,13 +25,33 @@ export function SubjectsRoute() {
   const deleteSubject = useDeleteSubject();
   const subjects = subjectsQuery.data ?? [];
   const classes = classesQuery.data ?? [];
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [deletingSubject, setDeletingSubject] = useState<Subject | null>(null);
 
+  useEffect(() => {
+    if (searchParams.get('new') !== '1') {
+      return;
+    }
+
+    setEditingSubject(null);
+    setFormOpen(true);
+  }, [searchParams]);
+
   function openForm(subject: Subject | null = null) {
     setEditingSubject(subject);
     setFormOpen(true);
+  }
+
+  function closeForm() {
+    setFormOpen(false);
+    setEditingSubject(null);
+    if (searchParams.get('new') === '1') {
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
   }
 
   async function saveSubject(input: SubjectInput | Partial<Subject>) {
@@ -81,7 +102,7 @@ export function SubjectsRoute() {
 
       <SubjectForm
         isOpen={formOpen}
-        onClose={() => setFormOpen(false)}
+        onClose={closeForm}
         onSave={saveSubject}
         subject={editingSubject}
       />

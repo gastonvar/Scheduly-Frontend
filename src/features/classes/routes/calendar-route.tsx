@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { EntityDeleteDialog } from '@/components/common/entity-delete-dialog';
 import type { ClassInput } from '@/features/classes/api/classes-api';
@@ -29,17 +30,41 @@ export function CalendarRoute() {
   const classes = classesQuery.data ?? [];
   const students = studentsQuery.data ?? [];
   const subjects = subjectsQuery.data ?? [];
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
   const [defaultDuration, setDefaultDuration] = useState<number | null>(null);
   const [deletingClass, setDeletingClass] = useState<Class | null>(null);
 
+  useEffect(() => {
+    if (searchParams.get('new') !== '1') {
+      return;
+    }
+
+    setEditingClass(null);
+    setDefaultDate(null);
+    setDefaultDuration(null);
+    setFormOpen(true);
+  }, [searchParams]);
+
   function openForm(classItem: Class | null = null, date: string | null = null, durationHours: number | null = null) {
     setEditingClass(classItem);
     setDefaultDate(date);
     setDefaultDuration(durationHours);
     setFormOpen(true);
+  }
+
+  function closeForm() {
+    setFormOpen(false);
+    setEditingClass(null);
+    setDefaultDate(null);
+    setDefaultDuration(null);
+    if (searchParams.get('new') === '1') {
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
   }
 
   async function saveClass(input: ClassInput | Partial<Class>) {
@@ -124,9 +149,9 @@ export function CalendarRoute() {
         defaultDate={defaultDate}
         defaultDurationHours={defaultDuration}
         isOpen={formOpen}
-        onClose={() => setFormOpen(false)}
+        onClose={closeForm}
         onDelete={(classItem) => {
-          setFormOpen(false);
+          closeForm();
           setDeletingClass(classItem);
         }}
         onSave={saveClass}

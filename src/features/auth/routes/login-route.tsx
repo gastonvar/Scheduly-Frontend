@@ -46,7 +46,7 @@ export function LoginRoute() {
   }
 
   return (
-    <main className="flex min-h-svh flex-col overflow-y-auto bg-background px-4 py-6 text-foreground sm:py-10">
+    <main className="flex min-h-svh flex-col overflow-y-auto bg-background px-4 py-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] text-foreground sm:py-10">
       <div className="mx-auto my-auto w-full max-w-md rounded-2xl border bg-card p-5 shadow-sm sm:p-8">
         <p className="text-center text-xs font-bold uppercase tracking-[0.35em] text-primary">Tutor</p>
         <p className="mt-2 text-center text-2xl font-black">Scheduly</p>
