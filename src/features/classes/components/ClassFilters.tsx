@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Label } from '@/components/ui/label';
 import { NativeSelect } from '@/components/ui/native-select';
 import { StudentSearchBar } from '@/components/StudentSearchBar';
@@ -9,6 +9,7 @@ import {
   type ClassFilterState,
   type PaymentStatusFilter,
 } from '@/features/classes/hooks/useClassFilters';
+import { cn } from '@/lib/utils';
 import type { Subject, Student } from '@/types';
 
 export type { ClassFilterState, PaymentStatusFilter } from '@/features/classes/hooks/useClassFilters';
@@ -26,11 +27,42 @@ type ClassFiltersRootProps = ClassFiltersProps & {
 
 function ClassFiltersRoot({ children, filters, onChange, students, subjects }: ClassFiltersRootProps) {
   const { contextValue } = useClassFiltersRoot({ filters, onChange, students, subjects });
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterLabels = [
+    filters.paymentStatus !== 'all'
+      ? { all: 'Todas', paid: 'Pagadas', unpaid: 'Pendientes', free: 'Gratis' }[filters.paymentStatus]
+      : null,
+    filters.subjectId ? subjects.find((subject) => subject.id === filters.subjectId)?.name : null,
+    filters.studentId ? students.find((student) => student.id === filters.studentId)?.name : null,
+  ].filter((label): label is string => Boolean(label));
 
   return (
     <ClassFiltersContext.Provider value={contextValue}>
-      <div className="grid gap-3 rounded-xl border border-border bg-card p-4 md:grid-cols-3">
-        {children}
+      <div className="min-w-0 space-y-3">
+        <button
+          aria-expanded={filtersOpen}
+          className="flex h-11 w-full items-center gap-2 rounded-lg border border-input bg-card px-3 text-sm font-medium shadow-sm md:hidden"
+          onClick={() => setFiltersOpen((open) => !open)}
+          type="button"
+        >
+          <span>Filtros</span>
+          {activeFilterLabels.length > 0 ? (
+            <span className="ml-auto tabular-nums text-muted-foreground">{activeFilterLabels.length}</span>
+          ) : null}
+        </button>
+        {!filtersOpen && activeFilterLabels.length > 0 ? (
+          <p className="min-w-0 break-words text-xs text-muted-foreground md:hidden">
+            Filtros activos: {activeFilterLabels.join(' · ')}
+          </p>
+        ) : null}
+        <div
+          className={cn(
+            'grid gap-3 rounded-xl border border-border bg-card p-4 md:grid-cols-3',
+            filtersOpen ? 'mt-0' : 'hidden md:grid',
+          )}
+        >
+          {children}
+        </div>
       </div>
     </ClassFiltersContext.Provider>
   );

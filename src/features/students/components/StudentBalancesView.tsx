@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Loader2, Wallet } from 'lucide-react';
+import { PageHeader } from '@/components/common/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,38 @@ type StudentBalancesViewProps = {
   subjects: Subject[];
 };
 
+function UnpaidClassRow({
+  classItem,
+  onTogglePaid,
+  shareAmount,
+  subjectName,
+}: {
+  classItem: Class;
+  onTogglePaid: (classItem: Class) => void;
+  shareAmount: number;
+  subjectName: string;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="font-medium">{formatDate(classItem.date)}</p>
+        <p className="text-xs text-muted-foreground">
+          {formatTime(classItem.date)} · {subjectName}
+        </p>
+      </div>
+      <div className="flex min-w-0 flex-col gap-2 sm:items-end">
+        <div className="flex items-center justify-between gap-2 sm:justify-end">
+          <PriceDisplay amount={shareAmount} />
+          <Badge className={classStatusClassName(classItem)}>{classStatusLabel(classItem)}</Badge>
+        </div>
+        <Button className="w-full sm:w-auto" onClick={() => onTogglePaid(classItem)} type="button" variant="outline">
+          Marcar pagada
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function BalanceCard({
   balance,
   onTogglePaid,
@@ -35,8 +68,8 @@ function BalanceCard({
   return (
     <Card className="ring-1 ring-foreground/10">
       <CardHeader className="pb-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <CardTitle className="text-lg">{balance.student.name}</CardTitle>
             <CardDescription>
               {balance.unpaidClasses.length} pendiente
@@ -44,7 +77,7 @@ function BalanceCard({
               {balance.lastPaidDate ? ` · Último pago ${formatDate(balance.lastPaidDate)}` : ''}
             </CardDescription>
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <p className="text-xs text-muted-foreground">Saldo pendiente</p>
             <PriceDisplay amount={balance.unpaidTotal} />
           </div>
@@ -54,40 +87,55 @@ function BalanceCard({
         {balance.unpaidClasses.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sin clases pendientes.</p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead className="hidden sm:table-cell">Materia</TableHead>
-                <TableHead className="text-right">Monto</TableHead>
-                <TableHead className="text-right">Acción</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="space-y-2 md:hidden">
               {balance.unpaidClasses.map(({ classItem, shareAmount, subjectName }) => (
-                <TableRow key={classItem.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{formatDate(classItem.date)}</p>
-                      <p className="text-xs text-muted-foreground">{formatTime(classItem.date)}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">{subjectName}</TableCell>
-                  <TableCell className="text-right">
-                    <PriceDisplay amount={shareAmount} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Badge className={classStatusClassName(classItem)}>{classStatusLabel(classItem)}</Badge>
-                      <Button onClick={() => onTogglePaid(classItem)} size="sm" variant="outline">
-                        Marcar pagada
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <UnpaidClassRow
+                  classItem={classItem}
+                  key={classItem.id}
+                  onTogglePaid={onTogglePaid}
+                  shareAmount={shareAmount}
+                  subjectName={subjectName}
+                />
               ))}
-            </TableBody>
-          </Table>
+            </div>
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Materia</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead className="text-right">Acción</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {balance.unpaidClasses.map(({ classItem, shareAmount, subjectName }) => (
+                    <TableRow key={classItem.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{formatDate(classItem.date)}</p>
+                          <p className="text-xs text-muted-foreground">{formatTime(classItem.date)}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{subjectName}</TableCell>
+                      <TableCell className="text-right">
+                        <PriceDisplay amount={shareAmount} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Badge className={classStatusClassName(classItem)}>{classStatusLabel(classItem)}</Badge>
+                          <Button onClick={() => onTogglePaid(classItem)} type="button" variant="outline">
+                            Marcar pagada
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
@@ -124,13 +172,11 @@ export function StudentBalancesView({
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Saldos</h1>
-          <p className="text-sm text-muted-foreground">
-            Pendientes de cobro por alumno. El monto se reparte entre asistentes de cada clase.
-          </p>
-        </div>
-        <div className="rounded-lg border border-border bg-card px-4 py-3 text-right">
+        <PageHeader
+          description="Pendientes de cobro por alumno. El monto se reparte entre asistentes de cada clase."
+          title="Saldos"
+        />
+        <div className="rounded-lg border border-border bg-card px-4 py-3 sm:text-right">
           <p className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
             <Wallet className="size-3.5" />
             Total filtrado
@@ -146,6 +192,7 @@ export function StudentBalancesView({
           </div>
         ) : null}
         <Button
+          className="w-full sm:w-auto"
           onClick={() => setOnlyPending((current) => !current)}
           type="button"
           variant={onlyPending ? 'default' : 'outline'}

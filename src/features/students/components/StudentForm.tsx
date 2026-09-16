@@ -55,16 +55,16 @@ export function StudentForm({ isOpen, onClose, onSave, student, students }: Stud
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Contactos</Label>
-              <Button onClick={addContact} type="button" variant="ghost" size="sm">
-                <Plus className="size-3.5" data-icon="inline-start" />
+              <Button onClick={addContact} type="button" variant="ghost">
+                <Plus className="size-4" data-icon="inline-start" />
                 Agregar
               </Button>
             </div>
             <div className="space-y-2">
               {form.contacts.map((contact) => (
-                <div className="flex gap-2" key={contact.id}>
+                <div className="flex flex-col gap-2 sm:flex-row" key={contact.id}>
                   <NativeSelect
-                    className="w-auto shrink-0"
+                    className="w-full sm:w-auto sm:shrink-0"
                     onChange={(event) => updateContact(contact.id, { type: event.target.value as ContactType })}
                     value={contact.type}
                   >
@@ -82,13 +82,14 @@ export function StudentForm({ isOpen, onClose, onSave, student, students }: Stud
                   />
                   <Button
                     aria-label="Quitar contacto"
+                    className="w-full sm:w-auto"
                     disabled={form.contacts.length === 1}
                     onClick={() => removeContact(contact.id)}
                     type="button"
-                    variant="ghost"
-                    size="icon-sm"
+                    variant="outline"
                   >
-                    <X className="size-3.5" />
+                    <X className="size-4" />
+                    Quitar
                   </Button>
                 </div>
               ))}

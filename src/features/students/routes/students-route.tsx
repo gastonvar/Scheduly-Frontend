@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { EntityDeleteDialog } from '@/components/common/entity-delete-dialog';
 import { useClasses } from '@/features/classes/hooks/use-classes';
@@ -27,13 +28,33 @@ export function StudentsRoute() {
   const students = studentsQuery.data ?? [];
   const subjects = subjectsQuery.data ?? [];
   const classes = classesQuery.data ?? [];
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
 
+  useEffect(() => {
+    if (searchParams.get('new') !== '1') {
+      return;
+    }
+
+    setEditingStudent(null);
+    setFormOpen(true);
+  }, [searchParams]);
+
   function openForm(student: Student | null = null) {
     setEditingStudent(student);
     setFormOpen(true);
+  }
+
+  function closeForm() {
+    setFormOpen(false);
+    setEditingStudent(null);
+    if (searchParams.get('new') === '1') {
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
   }
 
   async function saveStudent(input: StudentInput | Partial<Student>) {
@@ -86,7 +107,7 @@ export function StudentsRoute() {
 
       <StudentForm
         isOpen={formOpen}
-        onClose={() => setFormOpen(false)}
+        onClose={closeForm}
         onSave={saveStudent}
         student={editingStudent}
         students={students}
